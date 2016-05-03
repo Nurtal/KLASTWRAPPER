@@ -1,0 +1,23 @@
+<tool id="ngklast" name="Recherche d'homologie de sequences" version="0.1.0">
+	<description>for each sequence in a file</description>
+	<command interpreter="perl">run_ngklast.pl $input $tool</command>
+	
+	<macros>
+        	<token name="@BINARY@">Tardis</token>
+        	<import>ngklast_macros.xml</import>
+    	</macros>
+
+	<inputs>
+		<param format="fasta" name="input" type="data" label="Nucleotide query sequence(s)"/>
+    		<expand macro="Algo" />
+	</inputs>
+
+
+	<outputs>
+		<data format="tabular" name="output" />
+	</outputs>
+
+	<help>
+	Run ngklast.
+  	</help>
+</tool>
