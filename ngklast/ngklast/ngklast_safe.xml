@@ -1,0 +1,72 @@
+<tool id="ngklast" name="Recherche d'homologie de sequences" version="0.1.0">
+	<description>for each sequence in a file</description>
+
+	<requirements>
+            <requirement type="binary">@BINARY@</requirement>
+            <requirement type="package" version="2.3.0">plast</requirement>
+        </requirements>
+        <version_command>@BINARY@ -h</version_command>
+	
+	<macros>
+                <token name="@BINARY@">macro1</token>
+                <import>ngklast_macros.xml</import>
+        </macros>
+
+
+	<command>
+	#if $choice_algo.tool=="plast"
+	/home/nfoulqui/WorkSpace/galaxy/tools/plast/plast-library/build/bin/PlastCmd
+	-p "$choice_algo.choice_algo2.algo_plast"
+	-i "$query"
+	
+	#if $choice_algo.choice_algo2.db_opts.db_opts_selector=="histdb":
+	-d "$choice_algo.choice_algo2.db_opts.histdb"
+	#end if
+	#if $choice_algo.choice_algo2.db_opts.db_opts_selector=="db":
+        -d "$choice_algo.choice_algo2.db_opts.db"
+        #end if
+	#if $choice_algo.choice_algo2.db_opts.db_opts_selector=="file":
+        -d "$choice_algo.choice_algo2.db_opts.subject"
+        #end if
+
+	-o "$output"
+	
+	-outfmt 2
+
+	#if $choice_algo.choice_algo2.ext_param.ext_param_selector=="extended":
+	$choice_algo.choice_algo2.ext_param.filter_query
+	$choice_algo.choice_algo2.ext_param.strand
+	$choice_algo.choice_algo2.ext_param.match_mismatch
+	#end if
+
+	#if $choice_algo.choice_algo2.config_param.config_param_selector=="advanced":
+	-a $choice_algo.choice_algo2.config_param.nb_threads
+	-max-database-size $choice_algo.choice_algo2.config_param.max_db_size
+	#if (str($choice_algo.choice_algo2.config_param.ungap_threshold_nucl) and int(str($choice_algo.choice_algo2.config_param.ungap_threshold_nucl)) > 0):
+	-s $choice_algo.choice_algo2.config_param.ungap_threshold_nucl
+	#end if
+	-xdrop-ungap $choice_algo.choice_algo2.config_param.ungap_Xdrop
+	-X $choice_algo.choice_algo2.config_param.gap_Xdrop
+	-Z $choice_algo.choice_algo2.config_param.final_gap_Xdrop 
+	#end if 
+	#end if
+	
+	#if $choice_algo.tool=="blast"
+	echo "Murlock is back"
+	#end if
+	</command>
+	
+
+	<inputs>
+    		<expand macro="Algo" />
+	</inputs>
+
+
+	<outputs>
+		<data format="tabular" name="output" label="testFalcon"/>
+	</outputs>
+
+	<help>
+	Run ngklast.
+  	</help>
+</tool>
