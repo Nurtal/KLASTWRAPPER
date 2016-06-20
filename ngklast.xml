@@ -16,6 +16,7 @@
 
 
 	<command>
+	perl /home/nfoulqui/WorkSpace/galaxy/tools/ngklast/run_ngklast.pl
 	#if $choice_algo.tool=="plast"
 	/home/nfoulqui/WorkSpace/galaxy/tools/plast/plast-library/build/bin/PlastCmd
 	-p "$choice_algo.choice_algo2.algo_plast"
@@ -31,25 +32,38 @@
         -d "$choice_algo.choice_algo2.db_opts.subject"
         #end if
 
-	-o "$output"
+	##-o "$output"
+	-o "mainOutput.dat"
+
+	-full-stats "statistic.dat"
 	
-	-outfmt 2
+	-outfmt 1
 
 	#if $choice_algo.choice_algo2.ext_param.ext_param_selector=="extended":
 	$choice_algo.choice_algo2.ext_param.filter_query
+	#if $choice_algo.choice_algo2.algo_plast=="plastn":
 	$choice_algo.choice_algo2.ext_param.strand
 	$choice_algo.choice_algo2.ext_param.match_mismatch
+	#else:
+	-M $choice_algo.choice_algo2.ext_param.matrix
+	$choice_algo.choice_algo2.ext_param.gap_costs	
+	#end if
 	#end if
 
 	#if $choice_algo.choice_algo2.config_param.config_param_selector=="advanced":
 	-a $choice_algo.choice_algo2.config_param.nb_threads
 	-max-database-size $choice_algo.choice_algo2.config_param.max_db_size
-	#if (str($choice_algo.choice_algo2.config_param.ungap_threshold_nucl) and int(str($choice_algo.choice_algo2.config_param.ungap_threshold_nucl)) > 0):
-	-s $choice_algo.choice_algo2.config_param.ungap_threshold_nucl
-	#end if
+	
+	## [NON DISPONIBLE]
+	##if (str($choice_algo.choice_algo2.config_param.ungap_threshold_nucl) and int(str($choice_algo.choice_algo2.config_param.ungap_threshold_nucl)) > 0):
+	##-s $choice_algo.choice_algo2.config_param.ungap_threshold_nucl
+	##end if
+
+	#if $choice_algo.choice_algo2.algo_plast=="plastn":	
 	-xdrop-ungap $choice_algo.choice_algo2.config_param.ungap_Xdrop
-	-X $choice_algo.choice_algo2.config_param.gap_Xdrop
+	## -X $choice_algo.choice_algo2.config_param.gap_Xdrop
 	-Z $choice_algo.choice_algo2.config_param.final_gap_Xdrop 
+	#end if
 	#end if 
 	#end if
 	
@@ -69,6 +83,8 @@
 		-query_gencode $choice_algo.choice_algo2.query_gencode
 		##-task "$choice_algo.choice_algo2.blast_type"
 	#end if	
+	
+	-out "mainOutput.dat"
 
 	##if $choice_algo.choice_algo2.algo_blast=="blastp":
                 ##-task "$choice_algo.choice_algo2.blast_type"
@@ -85,7 +101,7 @@
 	-evalue $choice_algo.choice_algo2.evalue_cutoff
 
 	#if str($choice_algo.choice_algo2.output.out_format)=="ext":
-		-outfmt "6 std sallseqid score nident positive gaps ppos qframe sframe qseq sseq qlen slen salltitles"
+		-outfmt \"6 std sallseqid score nident positive gaps ppos qframe sframe qseq sseq qlen slen salltitles\"
 	#elif str($choice_algo.choice_algo2.output.out_format)=="cols"
 	#set cols = (str($choice_algo.choice_algo2.output.std_cols)+","+str($choice_algo.choice_algo2.output.ext_cols)+","+str($choice_algo.choice_algo2.output.ids_cols)+","+str($choice_algo.choice_algo2.output.misc_cols)+","+str($choice_algo.choice_algo2.output.tax_cols)).replace("None", "").replace(",,", ",").replace(",", " ").strip()
 	-outfmt "6 $cols"
@@ -119,7 +135,7 @@
                 #end if
 
 		#if $choice_algo.choice_algo2.algo_blast=="tblastx":
-                	-db_gencode $choice_algo.choice_algo2.adv_opts.db_gencode
+                	##-db_gencode $choice_algo.choice_algo2.adv_opts.db_gencode
 			$choice_algo.choice_algo2.adv_opts.strand
 			-matrix $choice_algo.choice_algo2.adv_opts.matrix
 		#end if			
@@ -155,6 +171,8 @@
 	#end if	
 
 	#end if
+	"$html_file"
+	"$html_file.files_path"
 	</command>
 	
 
@@ -220,7 +238,7 @@
 							<param name="filter_query" type="boolean" label="Filter out low complexity regions (with SEG)" truevalue="-F T" falsevalue="-F F" checked="true" />
 							<param name="matrix" type="select" label="Scoring matrix" help="Similarity matrix used by Plast to compare the two databanks">
 								<option value="BLOSUM62" selected="true">BLOSUM62 (default)</option>
-								<option value="BLOSUM50">BLOSUM50</option>
+								<!-- [NON DISPONIBLE] <option value="BLOSUM50">BLOSUM50</option> -->
 							</param>
 							<param name="gap_costs" type="select" label="Gap costs" help="Penalty costs used by Plast to create and extend gapped sequence alignments">
 								<option value="-G 11 -E 2" selected="true">Open:11 Ext:2 (default)</option>
@@ -315,7 +333,7 @@
 							<param name="filter_query" type="boolean" label="Filter out low complexity regions (with SEG)" truevalue="-F T" falsevalue="-F F" checked="true"     />
 							<param name="matrix" type="select" label="Scoring matrix" help="Similarity matrix used by Plast to compare the two databanks">
 								<option value="BLOSUM62" selected="true">BLOSUM62 (default)</option>
-								<option value="BLOSUM50">BLOSUM50</option>
+								<!-- [NON DISPONIBLE] <option value="BLOSUM50">BLOSUM50</option> -->
 							</param>
 							<param name="gap_costs" type="select" label="Gap costs" help="Penalty costs used by Plast to create and extend gapped sequence alignments">
 								<option value="-G 11 -E 2" selected="true">Open:11 Ext:2 (default)</option>
@@ -497,7 +515,7 @@
 							<param name="filter_query" type="boolean" label="Filter out low complexity regions (with SEG)" truevalue="-F T" falsevalue="-F F" checked="true"         />
 							<param name="matrix" type="select" label="Scoring matrix" help="Similarity matrix used by Plast to compare the two databanks">
 								<option value="BLOSUM62" selected="true">BLOSUM62 (default)</option>
-								<option value="BLOSUM50">BLOSUM50</option>
+								<!-- [NON DISPONIBLE] <option value="BLOSUM50">BLOSUM50</option> -->
 							</param>
 							<param name="gap_costs" type="select" label="Gap costs" help="Penalty costs used by Plast to create and extend gapped sequence alignments">
 								<option value="-G 11 -E 2" selected="true">Open:11 Ext:2 (default)</option>
@@ -592,7 +610,7 @@
 							<param name="filter_query" type="boolean" label="Filter out low complexity regions (with SEG)" truevalue="-F T" falsevalue="-F F" checked="true"/>
 							<param name="matrix" type="select" label="Scoring matrix" help="Similarity matrix used by Plast to compare the two databanks">
 								<option value="BLOSUM62" selected="true">BLOSUM62 (default)</option>
-								<option value="BLOSUM50">BLOSUM50</option>
+								<!-- [NON DISPONIBLE] <option value="BLOSUM50">BLOSUM50</option> -->
 							</param>
 							<param name="gap_costs" type="select" label="Gap costs" help="Penalty costs used by Plast to create and extend gapped sequence alignments">
 								<option value="-G 11 -E 2" selected="true">Open:11 Ext:2 (default)</option>
@@ -688,16 +706,16 @@
 					<param name="evalue_cutoff" type="float" size="15" value="0.001" label="Set expectation value cutoff" />
 					<conditional name="output">
 						<param name="out_format" type="select" label="Output format">
-							<option value="6">Tabular (standard 12 columns)</option>
+							<!-- [NON DISPONIBLE] <option value="6">Tabular (standard 12 columns)</option> -->
 							<option value="ext" selected="True">Tabular (extended 25 columns)</option>
-							<option value="cols">Tabular (select which columns)</option>
-							<option value="5">BLAST XML</option>
-							<option value="0">Pairwise text</option>
-							<option value="0 -html">Pairwise HTML</option>
-							<option value="2">Query-anchored text</option>
-							<option value="2 -html">Query-anchored HTML</option>
-							<option value="4">Flat query-anchored text</option>
-							<option value="4 -html">Flat query-anchored HTML</option>
+							<!-- [NON DISPONIBLE] <option value="cols">Tabular (select which columns)</option> -->
+							<!-- [NON DISPONIBLE] <option value="5">BLAST XML</option> -->
+							<!-- [NON DISPONIBLE] <option value="0">Pairwise text</option> -->
+							<!-- [NON DISPONIBLE] <option value="0 -html">Pairwise HTML</option> -->
+							<!-- [NON DISPONIBLE] <option value="2">Query-anchored text</option> -->
+							<!-- [NON DISPONIBLE] <option value="2 -html">Query-anchored HTML</option> -->
+							<!-- [NON DISPONIBLE] <option value="4">Flat query-anchored text</option> -->
+							<!-- [NON DISPONIBLE] <option value="4 -html">Flat query-anchored HTML</option> -->
 						</param>
 						<when value="6"/>
 						<when value="ext"/>
@@ -776,14 +794,14 @@
 							
 							<param name="filter_query" type="boolean" label="Filter out low complexity regions (with SEG)" truevalue="-seg yes" falsevalue="-seg no" checked="false" />
 							<param name="matrix" type="select" label="Scoring matrix">
-								<option value="BLOSUM90">BLOSUM90</option>
-								<option value="BLOSUM80">BLOSUM80</option>
+								<!-- [NON DISPONIBLE] <option value="BLOSUM90">BLOSUM90</option> -->
+								<!-- [NON DISPONIBLE] <option value="BLOSUM80">BLOSUM80</option> -->
 								<option value="BLOSUM62" selected="true">BLOSUM62 (default)</option>
-								<option value="BLOSUM50">BLOSUM50</option>
-								<option value="BLOSUM45">BLOSUM45</option>
-								<option value="PAM250">PAM250</option>
-								<option value="PAM70">PAM70</option>
-								<option value="PAM30">PAM30</option>
+								<!-- [NON DISPONIBLE] <option value="BLOSUM50">BLOSUM50</option> -->
+								<!-- [NON DISPONIBLE] <option value="BLOSUM45">BLOSUM45</option> -->
+								<!-- [NON DISPONIBLE] <option value="PAM250">PAM250</option> -->
+								<!-- [NON DISPONIBLE] <option value="PAM70">PAM70</option> -->
+								<!-- [NON DISPONIBLE] <option value="PAM30">PAM30</option> -->
 							</param>
 							<param name="max_hits" type="integer" value="0" label="Maximum hits to show" help="Use zero for default limits">
 								<validator type="in_range" min="0" />
@@ -1025,16 +1043,16 @@
 					<param name="evalue_cutoff" type="float" size="15" value="0.001" label="Set expectation value cutoff" />
 					<conditional name="output">
 						<param name="out_format" type="select" label="Output format">
-							<option value="6">Tabular (standard 12 columns)</option>
+							<!-- [NON DISPONIBLE] <option value="6">Tabular (standard 12 columns)</option> -->
 							<option value="ext" selected="True">Tabular (extended 25 columns)</option>
-							<option value="cols">Tabular (select which columns)</option>
-							<option value="5">BLAST XML</option>
-							<option value="0">Pairwise text</option>
-							<option value="0 -html">Pairwise HTML</option>
-							<option value="2">Query-anchored text</option>
-							<option value="2 -html">Query-anchored HTML</option>
-							<option value="4">Flat query-anchored text</option>
-							<option value="4 -html">Flat query-anchored HTML</option>
+							<!-- [NON DISPONIBLE] <option value="cols">Tabular (select which columns)</option> -->
+							<!-- [NON DISPONIBLE] <option value="5">BLAST XML</option> -->
+							<!-- [NON DISPONIBLE] <option value="0">Pairwise text</option> -->
+							<!-- [NON DISPONIBLE] <option value="0 -html">Pairwise HTML</option> -->
+							<!-- [NON DISPONIBLE] <option value="2">Query-anchored text</option> -->
+							<!-- [NON DISPONIBLE] <option value="2 -html">Query-anchored HTML</option> -->
+							<!-- [NON DISPONIBLE] <option value="4">Flat query-anchored text</option> -->
+							<!-- [NON DISPONIBLE] <option value="4 -html">Flat query-anchored HTML</option> -->
 						</param>
 						<when value="6"/>
 						<when value="ext"/>
@@ -1138,14 +1156,14 @@
 								<option value="-strand minus">Minus (reverse complement)</option>
 							</param>
 							<param name="matrix" type="select" label="Scoring matrix">
-								<option value="BLOSUM90">BLOSUM90</option>
-								<option value="BLOSUM80">BLOSUM80</option>
+								<!-- [NON DISPONIBLE] <option value="BLOSUM90">BLOSUM90</option> -->
+								<!-- [NON DISPONIBLE] <option value="BLOSUM80">BLOSUM80</option> -->
 								<option value="BLOSUM62" selected="true">BLOSUM62 (default)</option>
-								<option value="BLOSUM50">BLOSUM50</option>
-								<option value="BLOSUM45">BLOSUM45</option>
-								<option value="PAM250">PAM250</option>
-								<option value="PAM70">PAM70</option>
-								<option value="PAM30">PAM30</option>
+								<!-- [NON DISPONIBLE] <option value="BLOSUM50">BLOSUM50</option> -->
+								<!-- [NON DISPONIBLE] <option value="BLOSUM45">BLOSUM45</option> -->
+								<!-- [NON DISPONIBLE] <option value="PAM250">PAM250</option> -->
+								<!-- [NON DISPONIBLE] <option value="PAM70">PAM70</option> -->
+								<!-- [NON DISPONIBLE] <option value="PAM30">PAM30</option> -->
 							</param>
 							<param name="max_hits" type="integer" value="0" label="Maximum hits to show" help="Use zero for default limits">
 								<validator type="in_range" min="0" />
@@ -1239,16 +1257,16 @@
 					<param name="evalue_cutoff" type="float" size="15" value="0.001" label="Set expectation value cutoff" />
 					<conditional name="output">
 						<param name="out_format" type="select" label="Output format">
-							<option value="6">Tabular (standard 12 columns)</option>
+							<!-- [NON DISPONIBLE] <option value="6">Tabular (standard 12 columns)</option> -->
 							<option value="ext" selected="True">Tabular (extended 25 columns)</option>
-							<option value="cols">Tabular (select which columns)</option>
-							<option value="5">BLAST XML</option>
-							<option value="0">Pairwise text</option>
-							<option value="0 -html">Pairwise HTML</option>
-                					<option value="2">Query-anchored text</option>
-							<option value="2 -html">Query-anchored HTML</option>
-							<option value="4">Flat query-anchored text</option>
-							<option value="4 -html">Flat query-anchored HTML</option>
+							<!-- [NON DISPONIBLE] <option value="cols">Tabular (select which columns)</option> -->
+							<!-- [NON DISPONIBLE] <option value="5">BLAST XML</option> -->
+							<!-- [NON DISPONIBLE] <option value="0">Pairwise text</option> -->
+							<!-- [NON DISPONIBLE] <option value="0 -html">Pairwise HTML</option> -->
+                			<!-- [NON DISPONIBLE] 		<option value="2">Query-anchored text</option> -->
+							<!-- [NON DISPONIBLE] <option value="2 -html">Query-anchored HTML</option> -->
+							<!-- [NON DISPONIBLE] <option value="4">Flat query-anchored text</option> -->
+							<!-- [NON DISPONIBLE] <option value="4 -html">Flat query-anchored HTML</option> -->
 						</param>
 						<when value="6"/>
 						<when value="ext"/>
@@ -1331,14 +1349,14 @@
 								<option value="-strand minus">Minus (reverse complement)</option>
 							</param>
 							<param name="matrix" type="select" label="Scoring matrix">
-								<option value="BLOSUM90">BLOSUM90</option>
-								<option value="BLOSUM80">BLOSUM80</option>
+								<!-- [NON DISPONIBLE]  <option value="BLOSUM90">BLOSUM90</option> -->
+								<!-- [NON DISPONIBLE] <option value="BLOSUM80">BLOSUM80</option> -->
 								<option value="BLOSUM62" selected="true">BLOSUM62 (default)</option>
-								<option value="BLOSUM50">BLOSUM50</option>
-								<option value="BLOSUM45">BLOSUM45</option>
-								<option value="PAM250">PAM250</option>
-								<option value="PAM70">PAM70</option>
-								<option value="PAM30">PAM30</option>
+								<!-- [NON DISPONIBLE] <option value="BLOSUM50">BLOSUM50</option> -->
+								<!-- [NON DISPONIBLE] <option value="BLOSUM45">BLOSUM45</option> -->
+								<!-- [NON DISPONIBLE] <option value="PAM250">PAM250</option> -->
+								<!-- [NON DISPONIBLE] <option value="PAM70">PAM70</option> -->
+								<!-- [NON DISPONIBLE] <option value="PAM30">PAM30</option> -->
 							</param>
 							<param name="max_hits" type="integer" value="0" label="Maximum hits to show" help="Use zero for default limits">
 								<validator type="in_range" min="0" />
@@ -1404,16 +1422,16 @@
 					<param name="evalue_cutoff" type="float" size="15" value="0.001" label="Set expectation value cutoff" />
 					<conditional name="output">
 						<param name="out_format" type="select" label="Output format">
-							<option value="6">Tabular (standard 12 columns)</option>
+							<!-- [NON DISPONIBLE] <option value="6">Tabular (standard 12 columns)</option> -->
 							<option value="ext" selected="True">Tabular (extended 25 columns)</option>
-							<option value="cols">Tabular (select which columns)</option>
-							<option value="5">BLAST XML</option>
-							<option value="0">Pairwise text</option>
-							<option value="0 -html">Pairwise HTML</option>
-							<option value="2">Query-anchored text</option>
-							<option value="2 -html">Query-anchored HTML</option>
-							<option value="4">Flat query-anchored text</option>
-							<option value="4 -html">Flat query-anchored HTML</option>
+							<!-- [NON DISPONIBLE] <option value="cols">Tabular (select which columns)</option> -->
+							<!-- [NON DISPONIBLE] <option value="5">BLAST XML</option> -->
+							<!-- [NON DISPONIBLE] <option value="0">Pairwise text</option> -->
+							<!-- [NON DISPONIBLE] <option value="0 -html">Pairwise HTML</option> -->
+							<!-- [NON DISPONIBLE] <option value="2">Query-anchored text</option> -->
+							<!-- [NON DISPONIBLE] <option value="2 -html">Query-anchored HTML</option> -->
+							<!-- [NON DISPONIBLE] <option value="4">Flat query-anchored text</option> -->
+							<!-- [NON DISPONIBLE] <option value="4 -html">Flat query-anchored HTML</option> -->
 						</param>
 						<when value="6"/>
 						<when value="ext"/>
@@ -1511,14 +1529,14 @@
 							</param>
 							<param name="filter_query" type="boolean" label="Filter out low complexity regions (with SEG)" truevalue="-seg yes" falsevalue="-seg no" checked="true" />
 							<param name="matrix" type="select" label="Scoring matrix">
-								<option value="BLOSUM90">BLOSUM90</option>
-								<option value="BLOSUM80">BLOSUM80</option>
+								<!-- [NON DISPONIBLE] <option value="BLOSUM90">BLOSUM90</option> -->
+								<!-- [NON DISPONIBLE] <option value="BLOSUM80">BLOSUM80</option> -->
 								<option value="BLOSUM62" selected="true">BLOSUM62 (default)</option>
-								<option value="BLOSUM50">BLOSUM50</option>
-								<option value="BLOSUM45">BLOSUM45</option>
-								<option value="PAM250">PAM250</option>
-								<option value="PAM70">PAM70</option>
-								<option value="PAM30">PAM30</option>
+								<!-- [NON DISPONIBLE] <option value="BLOSUM50">BLOSUM50</option> -->
+								<!-- [NON DISPONIBLE] <option value="BLOSUM45">BLOSUM45</option> -->
+								<!-- [NON DISPONIBLE] <option value="PAM250">PAM250</option> -->
+								<!-- [NON DISPONIBLE] <option value="PAM70">PAM70</option> -->
+								<!-- [NON DISPONIBLE] <option value="PAM30">PAM30</option> -->
 							</param>
 							<param name="max_hits" type="integer" value="0" label="Maximum hits to show" help="Use zero for default limits">
 								<validator type="in_range" min="0" />
@@ -1556,17 +1574,10 @@
 	</inputs>
 
 
+
+
 	<outputs>
-		<data format="tabular" name="output" label="Tests"/>
-		<change_format>
-            		<when input="output.out_format" value="0" format="txt"/>
-            		<when input="output.out_format" value="0 -html" format="html"/>
-            		<when input="output.out_format" value="2" format="txt"/>
-            		<when input="output.out_format" value="2 -html" format="html"/>
-            		<when input="output.out_format" value="4" format="txt"/>
-            		<when input="output.out_format" value="4 -html" format="html"/>
-            		<when input="output.out_format" value="5" format="blastxml"/>
-        	</change_format>
+		<data format="html" name="html_file" label="ngklast"/>
 	</outputs>
 
 	<help>

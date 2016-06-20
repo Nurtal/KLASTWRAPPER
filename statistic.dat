@@ -1,0 +1,110 @@
+algorithm                               
+    params                                  
+        seedModelKind                            : 1
+        seedSpan                                 : 4
+        subseedStrings                           : 4
+            str                                      : A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y
+            str                                      : CFYWMLIV,GPATSNHQEDRK
+            str                                      : A,C,FYW,G,IV,ML,NH,P,QED,RK,TS
+            str                                      : A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y
+        matrixKind                               : 0
+        subject                                 
+            uri                                      : /home/nfoulqui/WorkSpace/galaxy/database/files/000/dataset_153.dat
+                range                                   
+                    begin                                    : 0
+                    end                                      : 11950357
+        subject                                 
+            uri                                      : /home/nfoulqui/WorkSpace/galaxy/database/files/000/dataset_152.dat
+                range                                   
+                    begin                                    : 0
+                    end                                      : 50055
+        filterQuery                              : 1
+        ungapNeighbourLength                     : 22
+        ungapScoreThreshold                      : 38
+        smallGapBandLength                       : 64
+        smallGapBandWidth                        : 16
+        smallGapThreshold                        : 40
+        openGapCost                              : 11
+        extendGapCost                            : 1
+        evalue                                   : 10
+        XdroppofUnGap                            : 0
+        XdroppofGap                              : 32
+        finalXdroppofGap                         : 54
+        strands                                  : 0
+        outputfile                               : mainOutput.dat
+        strands                                  : 0
+    seeds_model                             
+        span                                     : 4
+        seeds_number                             : 8800
+    databases                               
+        subject                                  : 19020808 bytes, 99588 sequences
+            size                                     : 19020808
+            nb_sequences                             : 99588
+        query                                    : 79398 bytes, 426 sequences
+            size                                     : 79398
+            nb_sequences                             : 426
+    indexes                                 
+        subject                                 
+            subject                                 
+            min_occur                                : ACAA (0)
+                number                                   : 0
+                kmer                                     : ACAA
+            max_occur                                : KGRK (5049815)
+                number                                   : 5049815
+                kmer                                     : KGRK
+            found_nb                                 : 5996
+            found_percentage                         : 68.14
+        query                                   
+            query                                   
+            min_occur                                : ACAA (0)
+                number                                   : 0
+                kmer                                     : ACAA
+            max_occur                                : KGIH (3)
+                number                                   : 3
+                kmer                                     : KGIH
+            found_nb                                 : 246
+            found_percentage                         : 2.80
+    hits                                    
+        SeedHitIteratorCachedWithSortedSeeds    
+            in                                       : 0
+            out                                      : 3165831
+            ratio                                    : 0
+        UngapHitIteratorSSE16                   
+            in                                       : 3165831
+            out                                      : 875
+            ratio                                    : 0.000276389
+            details                                 
+                score_ko                                 : 0
+                score_ok                                 : 0
+                known_ungap                              : 0
+        SmallGapHitIteratorSSE8                 
+            in                                       : 875
+            out                                      : 457
+            ratio                                    : 0.522286
+            details                                 
+                score_ko                                 : 0
+                score_ok                                 : 457
+        FullGapHitIterator                      
+            in                                       : 457
+            out                                      : 47
+            ratio                                    : 0.102845
+            details                                 
+                known_ungap                              : 1
+                known_gap                                : 409
+                computed                                 : 456
+        CompositionHitIterator                  
+            in                                       : 47
+            out                                      : 47
+            ratio                                    : 1
+            details                                 
+                known_gap                                : 0
+    ungap                                    : 54
+        size                                     : 54
+    alignments                               : 47
+        size                                     : 47
+    exec_time                               
+        algorithm                                : 1355
+        indexation                               : 864
+        iteration                                : 490
+        output                                   : 1
+        reading                                  : 412

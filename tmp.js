@@ -1,236 +1,14 @@
-#!/usr/bin/perl
-use strict;
-use warnings;
-use Cwd;
-use 5.010;
 
 
 
-#############
-# VARIABLES #####################################################################################
-#############						#					#
-my $cmd_line = "";					# The command line to execute		#
-my $html_path = $ARGV[-2]; 			# The path of html output file		#
-my $subject_file;					# The database file			#
-my $input_file = $ARGV[4]; 				# The input file			#
-my $output_file; 					# The output file ...			#
-my $stat_file; 						# Statistic informations file		#
-my $missmatch_count = 0; 				# Number of query not found in output	#
-my $query_count = 0; 					# Number of query in input file		#
-my $query_found = 0; 					# Number of query found in output file	#
-my $hit_count = 0; 					# Number of hits in output file		#
-my $bit_size_query = 0; 				# Size of the query			#
-my $bit_size_subject = 0; 				# Size of the subject			#
-my $shortest_sequence_query = 99999; 			# Shortest sequence in query		#
-my $shortest_sequence_subject = 99999; 			# Shortest sequence in subject		#
-my $largest_sequence_query = 0; 			# Largest sequence in query		#
-my $largest_sequence_subject = 0; 			# Largest sequence in subject		#
-my $number_sequence_query = 0; 				# Number of sequences in query		#
-my $number_sequence_subject = 0; 			# Number of sequence in subject		#
-my $executionTime_dataFile = "executionTime.tsv"; 	# File containing the data to display	#
-my $executionTime_algorithm = 0; 			# Time used for the algorithm		#
-my $executionTime_indexation = 0; 			# Time used for the indexation		#
-my $executionTime_iteration = 0; 			# Time used for iterations		#
-my $executionTime_output = 0; 				# Time used to create the output	#
-my $executionTime_reading = 0; 				# Time used for reading			#
-my $current_directory = getcwd;				# Current Directory			#
-my $is_in_database = 0;					# Location when parsing stat file	#
-my $is_in_query = 0;					# Location when parsing stat file	#
-my $is_in_subject = 0;					# Location when parsing stat file	#
-my $tool_used = "Plast";				# Blast or Plast algorithm		#
-my $index_in_query = 0;					# number of current line in query file	#
-my $seq_length = 0;					# length of sequence in query file	#
-my $index_in_subject = 0;				# Current line in subject file		#
-my @PathINArray;						# path of the nglkast directory	#
-my $size_unit;						# size unit for database (octect or bytes, according to the used tool)
-#################################################################################################
-
-###############
-# RUN COMMAND ###################################################################################
-###############											
-my $index_for_ARGV = 0;										
-foreach my $element (@ARGV){									
-	if($element eq "-query"){								
-		$tool_used = "Blast";
-		$input_file = $ARGV[$index_for_ARGV + 1];								
-	}											
-	if($element eq "-o" or $element eq "-out"){						
-		$output_file = $ARGV[$index_for_ARGV + 1];					
-	}											
-	if($element eq "-full-stats"){								
-		$stat_file = $ARGV[$index_for_ARGV + 1];					
-												
-	}											
-	if($element ne $ARGV[-1] and $element ne $ARGV[-2]){					
-		$cmd_line=$cmd_line.$element." ";						
-		
-	}											
-	if($element eq "-db" or $element eq "-subject"){
-		$subject_file = $ARGV[$index_for_ARGV + 1];
-	}
-	$index_for_ARGV = $index_for_ARGV + 1;
-								
-}												
-system("mkdir -p $ARGV[-1]");								
-system("$cmd_line");										
-#################################################################################################
-
-#################
-# GET STAT INFO #################################################################################
-#################
-if($tool_used eq "Plast"){
-	$size_unit = "bytes";
-	open(my $fhstatistic, "<", $stat_file);								
-	my $line_number = 0;										
-	while(my $line = <$fhstatistic>){								
-		$line_number++;										
-												
-		if($line =~ m/.+databases.+/){								
-			$is_in_database = 1;								
-		}elsif($line =~ m/.+indexes.+/){								
-			$is_in_database = 0;								
-			$is_in_subject = 0;								
-			$is_in_query = 0;								
-		}											
-												
-		if($is_in_database && $line =~ m/.+subject.+/){						
-			$is_in_subject = 1;								
-		}elsif($is_in_database && $line =~ m/.+query/){						
-			$is_in_subject = 0;								
-			$is_in_query = 1;								
-		}											
-												
-		if($is_in_subject && $line =~ m/size.+:(.+)/){						
-			$bit_size_subject = $1;								
-		}											
-		if($is_in_query && $line =~ m/size.+:(.+)/){						
-			$bit_size_query = $1;								
-		}											
-		if($is_in_subject && $line =~ m/nb_sequences.+:(.+)/){					
-			$number_sequence_subject = $1;							
-		}											
-		if($is_in_query && $line =~ m/nb_sequences.+:(.+)/){						
-			$number_sequence_query = $1;							
-		}											
-		if($is_in_subject && $line =~ m/shortest.+:(.+)/){					
-			$shortest_sequence_subject = $1;						
-		}											
-		if($is_in_query && $line =~ m/shortest.+:(.+)/){					
-			$shortest_sequence_query = $1;							
-		}										
-		if($is_in_subject && $line =~ m/largest.+:(.+)/){					
-			$largest_sequence_subject = $1;						
-		}											
-		if($is_in_query && $line =~ m/largest.+:(.+)/){						
-			$largest_sequence_query = $1;							
-		}											
-		if($line =~ m/algorithm.+:(.+)/){							
-			$executionTime_algorithm = $1;							
-        	}											
-        	if($line =~ m/indexation.+:(.+)/){							
-			$executionTime_indexation = $1;							
-        	}											
-        	if($line =~ m/iteration.+:(.+)/){							
-			$executionTime_iteration = $1;							
-        	}											
-        	if($line =~ m/output.+: ([0-9].+)/){							
-			$executionTime_output = $1;							
-        	}											
-        	if($line =~ m/reading.+:(.+)/){								
-			$executionTime_reading = $1;							
-        	}											
-	}												
-	close($fhstatistic);										
-												
-	open(my $fhexecTime, ">", $executionTime_dataFile);						
-	print $fhexecTime "job\ttime\n";								
-	print $fhexecTime "algorithm\t$executionTime_algorithm\n";					
-	print $fhexecTime "indexation\t$executionTime_indexation\n";					
-	print $fhexecTime "iteration\t$executionTime_iteration\n";					
-	print $fhexecTime "output\t$executionTime_output\n";						
-	print $fhexecTime "reading\t$executionTime_reading\n";						
-	close($fhexecTime);										
-}	
-											
-open(my $fhquery, "<", "$input_file");
-$seq_length = 0;							
-while(my $lineInQuery = <$fhquery>){
-	if($lineInQuery =~ m/^>/){
-		$index_in_query++;
-		$query_count++;
-		my @lineInQueryInArray = split(" ", $lineInQuery);
-		$lineInQueryInArray[0] =~ s/.//;
-		my $query_id = $lineInQueryInArray[0];
-		my $queryNotFound = 1;								
-		$hit_count = 0;	
-		if($index_in_query != 1){
-			if($seq_length < $shortest_sequence_query){
-				$shortest_sequence_query = $seq_length;
-			}elsif($seq_length > $largest_sequence_query){
-				$largest_sequence_query = $seq_length;
-			}
-		}
-		$seq_length = 0;
-		open(my $fhresult, "<", "$output_file");					
-		while(my $lineInResult = <$fhresult>){						
-			my @lineInResultInArray = split("\t", $lineInResult);
-			if($query_id eq $lineInResultInArray[0]){
-				$queryNotFound = 0;
-			}
-			$hit_count++;								
-		}
-		if($queryNotFound){
-			$missmatch_count++;							
-		}										
-		close($fhresult);								
-        }else{
-        	$seq_length = $seq_length + length $lineInQuery;
-        }											
-}												
-$query_found = $query_count - $missmatch_count;
-$number_sequence_query = $query_count;
-close($fhquery);
 
 
-if($tool_used eq "Blast"){
-	$seq_length = 0;
-	$bit_size_subject = -s $subject_file;
-	$bit_size_query = -s $input_file;
-	$size_unit = "octets";
-	open(my $fhSubject, "<", $subject_file);
-	while(my $line = <$fhSubject>){
-		$index_in_subject++;
-		if($line =~ m/^>.+/){
-			$number_sequence_subject++;
-			if($index_in_subject != 1){
-				if($seq_length < $shortest_sequence_subject){
-					$shortest_sequence_subject = $seq_length;
-				}elsif($seq_length > $largest_sequence_subject){
-					$largest_sequence_subject = $seq_length;
-				}
-			}
-			$seq_length = 0;
-		}else{
-			$seq_length = $seq_length + length $line;
-		}
-	}
-	close($fhSubject);
-}										
 
-@PathINArray = split("/", $output_file);																		
-#my @PathInArray_statistic = split("/", $stat_file);						
-#################################################################################################
+print $fhHtml "<script type=\"text/javascript\">\n
+   		function bonjour(){\n
+   		alert('bonjour a tous');\n
+   		}\n
 
-
-############################
-# WRITE DYNAMIC JAVASCRIPT ######################################################################
-############################
-
-open(my $fhJS, ">", "/home/nfoulqui/WorkSpace/galaxy/tools/ngklast/fancy.js");
-print $fhJS "
-   		function bonjour(){
-   		alert('bonjour a tous');
-   		}
 
 		function graphe(){
                         var data = {
@@ -289,7 +67,7 @@ print $fhJS "
 					  \"QUERY\": {name: \"Query\", title: \"Query\"},
 					};
 	
-			data.topics = [ {name: \"size ($size_unit)\", re: /\\b(Murlock)\\b/gi, x: 558, y: 181},
+			data.topics = [ {name: \"size (MB)\", re: /\\b(Murlock)\\b/gi, x: 558, y: 181},
 					{name: \"number Of Sequences\", re: /\\b(Murlock)\\b/gi, x: 458, y: 181},
 					{name: \"shortest Sequence\", re: /\\b(Murlock)\\b/gi, x: 358, y: 181},
 					{name: \"largest Sequence\", re: /\\b(Murlock)\\b/gi, x: 258, y: 181}
@@ -368,6 +146,10 @@ print $fhJS "
 				.length;
 			}
 		})();		
+
+
+
+
 	
 		(function() {
 			var width = 500, 
@@ -409,7 +191,7 @@ print $fhJS "
 				topics.forEach(function(d) {
 					d.r = 65
 					d.cr = Math.max(minRadius, d.r);
-					if(d.name == \"size ($size_unit)\"){
+					if(d.name == \"size (MB)\"){
 						d.parties[0].count = $bit_size_subject;
 						d.parties[1].count = $bit_size_query;
 					}
@@ -731,6 +513,7 @@ print $fhJS "
 	}
 
 
+
 	/* Custom filtering function which will search data in column four between two values */
 	\$.fn.dataTable.ext.search.push(
 		function( settings, data, dataIndex ) {
@@ -815,9 +598,12 @@ print $fhJS "
 	}
 
 
-  ";
+   		</script>\n";
 
-print $fhJS "var dataSet = [ \n";
+
+print $fhHtml "<script>\n";
+print $fhHtml "var dataSet = [ \n";
+
 my $dataToWrite = "";
 open(my $fhdata2,"<", $PathINArray[-1]);
 while(my $line = <$fhdata2>){
@@ -842,10 +628,98 @@ while(my $line = <$fhdata2>){
 }
 close($fhdata2);
 substr($dataToWrite, '-2') = '';
-print $fhJS "$dataToWrite";
-print $fhJS "\n];\n";
+print $fhHtml "$dataToWrite";
+print $fhHtml "\n];\n";
 
-print $fhJS "
+
+print $fhHtml "</script>\n";
+
+print $fhHtml "<body>\n";
+
+
+print $fhHtml "<section>\n";
+print $fhHtml "<h2>Job Overview</h2>\n";
+
+print $fhHtml "<center>
+
+	<table>
+	<tr>
+	<td>
+	<div>\n
+		<canvas id=\"pieChart\" width=\"300\" height=\"300\"></canvas>\n
+	</div>\n
+	</td>
+
+	<td>
+	<div>\n
+		<canvas id=\"myChart\" width=\"400\" height=\"400\"></canvas>\n
+	</div>
+	</td>
+
+	<td>
+	<div>
+		<div id=\"g-chart\">
+		<div class=\"g-notes\">
+		<div class=\"g-note\" style=\"left:20px;\">
+		</div>
+		</div>
+		<div class=\"g-labels\"></div>
+		<svg class=\"g-nodes\" width=\"500\" height=\"500\">
+		</svg>
+		</div>
+		<script src=\"https://static01.nyt.com/newsgraphics/2012/09/04/convention-speeches/ac823b240e99920e91945dbec49f35b268c09c38/d3.v2.min.js\"></script>
+	</div>
+	</td>
+	</tr>
+	</table>
+	</center>\n";
+
+print $fhHtml "<center><button onclick='graphe()'>Display</button></center>";
+
+print $fhHtml "</section>\n";
+
+print $fhHtml "<section>\n";
+print $fhHtml "<h2>Best Hit Table</h2>\n";
+#print $fhHtml "<table id=\"example\" class=\"display\" width=\"100%\"></table>\n";
+
+print $fhHtml "<center>
+		<tbody>
+		<tr>
+			<td>Min id:</td>
+			<td><input id=\"minId\" name=\"minId\" type=\"text\"></td>
+		</tr>
+		<tr>
+			<td>ALignment Length:</td>
+			<td><input id=\"minAln\" name=\"minAln\" type=\"text\"></td>
+		</tr>
+		<tr>
+			<td>Score:</td>
+			<td><input id=\"bitScore\" name=\"bitScore\" type=\"text\"></td>
+		</tr>
+
+		</tbody>
+		</center>
+	</table><table id=\"example\" class=\"display\" cellspacing=\"0\" width=\"100%\"></table>";
+
+
+print $fhHtml "<center>\n";
+print $fhHtml "<button onclick='writeResultTable(dataSet)'>Display Table</button>\n";
+print $fhHtml "<button id=\"button\", name =\"button\">Export Selection</button>\n";
+print $fhHtml "<a href=\"$PathINArray[-1]\">Download all data</a>\n";
+print $fhHtml "<a download=\"info.txt\" id=\"downloadlink\" style=\"display: none\">Download Selection</a>\n";
+print $fhHtml "</center>\n";
+
+print $fhHtml "</section>\n";
+
+print $fhHtml "<section>\n";
+print $fhHtml "<h2>Computational informations</h2>\n";
+
+
+
+print $fhHtml "<center>\n";
+print $fhHtml "<label><input type=\"checkbox\"> Sort values</label>\n";
+print $fhHtml "<script src=\"d3.v3.min.js\"></script>\n";
+print $fhHtml "<script>
 			function timeInfo(){
 				var margin = {top: 20, right: 20, bottom: 30, left: 40},
     				width = 400 - margin.left - margin.right,
@@ -917,126 +791,34 @@ print $fhJS "
 							.delay(delay);
 						}
 					});
-				}";
-
-close($fhJS);
-#########################################################################################
-
-
-
-################################
-# COPY FILES TO WORK DIRECTORY ##########################################################
-################################							#
-system("cp -r $output_file $ARGV[-1]/");						#
-if($tool_used eq "Plast"){
-	system("cp -r $stat_file $ARGV[-1]/");							
-	system("cp $executionTime_dataFile $ARGV[-1]/");
-}
-system("cp /home/nfoulqui/WorkSpace/galaxy/tools/ngklast/chart.js $ARGV[-1]/");		#
-system("cp /home/nfoulqui/WorkSpace/galaxy/tools/ngklast/jquery.js $ARGV[-1]/");	#
-system("cp /home/nfoulqui/WorkSpace/galaxy/tools/ngklast/dataTable.js $ARGV[-1]/");	#
-system("cp /home/nfoulqui/WorkSpace/galaxy/tools/ngklast/d3.v3.min.js $ARGV[-1]/");	#
-system("cp /home/nfoulqui/WorkSpace/galaxy/tools/ngklast/style.css $ARGV[-1]/");	#
-system("cp /home/nfoulqui/WorkSpace/galaxy/tools/ngklast/style2.css $ARGV[-1]/");	#
-system("cp /home/nfoulqui/WorkSpace/galaxy/tools/ngklast/fancy.js $ARGV[-1]/");		#
-#########################################################################################
-
-
-
-
-#####################
-# WRITE HTML OUTPUT #####################################################################
-#####################
-open(my $fhHtml, ">", $html_path);
-print $fhHtml "<html>\n";
-print $fhHtml "<title> Results </title>\n";
-print $fhHtml "<link rel=\"stylesheet\" type=\"text/css\" href=\"style.css\" />";
-print $fhHtml "<script src=\"chart.js\"></script>\n";
-print $fhHtml "<script src=\"jquery.js\"></script>\n";
-print $fhHtml "<script src=\"dataTable.js\"></script>\n";
-print $fhHtml "<script src=\"fancy.js\"></script>\n";
-print $fhHtml "<script src=\"d3.v3.min.js\"></script>\n";
-print $fhHtml "<body>\n";
-
-print $fhHtml "<section>\n";
-print $fhHtml "<h2>Job Overview</h2>\n";
-print $fhHtml "<center>
-	<table>
-	<tr>
-	<td>
-	<div>\n
-		<canvas id=\"pieChart\" width=\"300\" height=\"300\"></canvas>\n
-	</div>\n
-	</td>
-	<td>
-	<div>\n
-		<canvas id=\"myChart\" width=\"400\" height=\"400\"></canvas>\n
-	</div>
-	</td>
-
-	<td>
-	<div>
-		<div id=\"g-chart\">
-		<div class=\"g-notes\">
-		<div class=\"g-note\" style=\"left:20px;\">
-		</div>
-		</div>
-		<div class=\"g-labels\"></div>
-		<svg class=\"g-nodes\" width=\"500\" height=\"500\">
-		</svg>
-		</div>
-	</div>
-	</td>
-	</tr>
-	</table>
-	</center>\n";
-print $fhHtml "<center><button onclick='graphe()'>Display</button></center>";
-print $fhHtml "</section>\n";
-
-print $fhHtml "<section>\n";
-print $fhHtml "<h2>Best Hit Table</h2>\n";
-print $fhHtml "<center>
-		<tbody>
-		<tr>
-			<td>Min id:</td>
-			<td><input id=\"minId\" name=\"minId\" type=\"text\"></td>
-		</tr>
-		<tr>
-			<td>ALignment Length:</td>
-			<td><input id=\"minAln\" name=\"minAln\" type=\"text\"></td>
-		</tr>
-		<tr>
-			<td>Score:</td>
-			<td><input id=\"bitScore\" name=\"bitScore\" type=\"text\"></td>
-		</tr>
-
-		</tbody>
-		</center>
-	</table><table id=\"example\" class=\"display\" cellspacing=\"0\" width=\"100%\"></table>";
-print $fhHtml "<center>\n";
-print $fhHtml "<button onclick='writeResultTable(dataSet)'>Display Table</button>\n";
-print $fhHtml "<button id=\"button\", name =\"button\">Export Selection</button>\n";
-print $fhHtml "<a href=\"$PathINArray[-1]\">Download all data</a>\n";
-print $fhHtml "<a download=\"info.txt\" id=\"downloadlink\" style=\"display: none\">Download Selection</a>\n";
+				}
+				</script>";
+print $fhHtml "<div2> <button onclick='timeInfo()'>Display performances</button> </div2>\n";
+#print $fhHtml "<button onclick='timeInfo()'>Display performances</button>\n";
 print $fhHtml "</center>\n";
+
 print $fhHtml "</section>\n";
 
+#print $fhHtml "<section>\n";
+#print $fhHtml "<h1>Biological Classification Table</h1>\n";
+#print $fhHtml "</section>\n";
 
-if($tool_used eq "Plast"){
-	print $fhHtml "<section>\n";
-	print $fhHtml "<h2>Computational informations</h2>\n";
-	print $fhHtml "<center>\n";
-	print $fhHtml "<label><input type=\"checkbox\"> Sort values</label>\n";
-	print $fhHtml "<div2> <button onclick='timeInfo()'>Display performances</button> </div2>\n";
-	print $fhHtml "</center>\n";
-	print $fhHtml "</section>\n";
-}
+
+#print $fhHtml "<section>\n";
+#print $fhHtml "<h1>Trash Stuff </h1>\n";
+#print $fhHtml "<button onclick='bonjour()'>click</button>\n";
+#print $fhHtml "<a href=\"$PathINArray[-1]\">Some special output</a>\n";
+#print $fhHtml "$ARGV[-1]\n";
+#print $fhHtml "$PathINArray[-1]\n";
+#print $fhHtml "$ARGV[3]\n";
+#print $fhHtml "</section>\n";
+
+
 print $fhHtml "</body>\n";
 print $fhHtml "</html>\n";
 close($fhHtml);
 
 
-#######
-# EOF #################################################################################
-#######
+
+
 
