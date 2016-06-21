@@ -870,16 +870,16 @@
 					
 					<conditional name="output">
 						<param name="out_format" type="select" label="Output format">
-							<option value="6">Tabular (standard 12 columns)</option>
+							<!-- [NON DISPONIBLE] <option value="6">Tabular (standard 12 columns)</option> -->
 							<option value="ext" selected="True">Tabular (extended 25 columns)</option>
-							<option value="cols">Tabular (select which columns)</option>
-							<option value="5">BLAST XML</option>
-							<option value="0">Pairwise text</option>
-							<option value="0 -html">Pairwise HTML</option>
-							<option value="2">Query-anchored text</option>
-							<option value="2 -html">Query-anchored HTML</option>
-							<option value="4">Flat query-anchored text</option>
-							<option value="4 -html">Flat query-anchored HTML</option>
+							<!-- [NON DISPONIBLE] <option value="cols">Tabular (select which columns)</option> -->
+							<!-- [NON DISPONIBLE] <option value="5">BLAST XML</option> -->
+							<!-- [NON DISPONIBLE] <option value="0">Pairwise text</option> -->
+							<!-- [NON DISPONIBLE] <option value="0 -html">Pairwise HTML</option> -->
+							<!-- [NON DISPONIBLE] <option value="2">Query-anchored text</option> -->
+							<!-- [NON DISPONIBLE] <option value="2 -html">Query-anchored HTML</option> -->
+							<!-- [NON DISPONIBLE] <option value="4">Flat query-anchored text</option> -->
+							<!-- [NON DISPONIBLE] <option value="4 -html">Flat query-anchored HTML</option> -->
 						</param>
 						<when value="6"/>
 						<when value="ext"/>
